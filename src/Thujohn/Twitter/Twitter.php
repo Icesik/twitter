@@ -230,6 +230,7 @@ class Twitter extends tmhOAuth {
 		if ($multipart)
 		{
 			$this->config['host'] = $this->tconfig['UPLOAD_URL'];
+			
 		}
 
 		$url = parent::url($this->tconfig['API_VERSION'].'/'.$name);
@@ -249,7 +250,8 @@ class Twitter extends tmhOAuth {
 		]);
 
 		$response = $this->response;
-
+		
+		
 		$format = 'object';
 
 		if (isset($parameters['format']))
@@ -266,11 +268,12 @@ class Twitter extends tmhOAuth {
 			$this->log('ERROR_CODE : '.$response['errorno']);
 			$this->log('ERROR_MSG : '.$response['error']);
 		}
-
-		if (isset($response['code']) && $response['code'] != 200)
+		
+		
+		if (isset($response['code']) && ($response['code'] < 199|| $response['code'] > 299))
 		{
 			$_response = $this->jsonDecode($response['response'], true);
-
+			
 			if (array_key_exists('errors', $_response))
 			{
 				$error_code = $_response['errors'][0]['code'];
@@ -428,11 +431,6 @@ class Twitter extends tmhOAuth {
 	public function linkAddTweetToFavorites($tweet)
 	{
 		return 'https://twitter.com/intent/favorite?tweet_id=' . $tweet->id_str;
-	}
-
-	public function linkReply($tweet)
-	{
-		return 'https://twitter.com/intent/tweet?in_reply_to=' . $tweet->id_str;
 	}
 
 	private function jsonDecode($json, $assoc = false)
