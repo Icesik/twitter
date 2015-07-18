@@ -9,21 +9,28 @@ Trait MediaTrait {
 	 *
 	 * Parameters :
 	 * - media
-	 * - media_data
 	 */
-	public function uploadMedia($parameters = [])
+	public function uploadMedia($parameters = [], $video = false)
 	{
-	        if (!array_key_exists('media', $parameters) && !array_key_exists('media_data', $parameters))
-	        {
-	            throw new Exception('Parameter required missing : media or media_data');
-	        }
-
-	        if (array_key_exists('media', $parameters) && array_key_exists('media_data', $parameters))
-	        {
-	            throw new Exception('You cannot use media and media_data at the same time');
-	        }
-
+		if (!array_key_exists('media', $parameters))
+		{
+			throw new Exception('Parameter required missing : media');
+		}
+		
+		if(!$video)
 		return $this->post('media/upload', $parameters, true);
+		else {
+			
+			$response = $this->post('media/upload', ['command' => 'INIT', 'media_type'=>'video/*', 'total_bytes' => strlen($parameters['media'])], true);
+			
+			$media_id = $response->media_id;
+			$response = $this->post('media/upload', ['command' => 'APPEND', 'media_id'=>$media_id, 'segment_index' => '0', 'media' => $parameters['media']], true);
+			
+			return $this->post('media/upload', ['command' => 'FINALIZE', 'media_id'=>$media_id], true);
+			
+				
+			}
+		
 	}
 
 }
